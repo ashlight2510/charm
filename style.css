@@ -242,11 +242,44 @@ body{
 }
 
 @media (max-width: 640px){
+  /* 모바일: 윗부분을 더 덜 보이게(게임 화면 확보) */
+  .topbar{
+    padding:8px 10px;
+  }
+  .brand{display:none}
+  .hud{
+    gap:8px;
+  }
+  .pill{
+    padding:7px 8px;
+    min-width:74px;
+  }
+  .pillLabel{font-size:9px}
+  .pillValue{font-size:14px}
+
+  .stageWrap{
+    padding:6px 12px 0;
+  }
+  .controls{
+    padding:10px 12px 14px;
+  }
+  .laneBtn{
+    padding:16px 10px;
+  }
+
   .cta-button{
     right:12px; bottom:12px;
     padding:11px 12px;
     gap:8px;
   }
   .cta-label{font-size:13px}
+}
+
+@media (max-width: 640px) and (max-height: 720px){
+  /* 작은 화면에서는 상단 전체를 숨겨서 게임/버튼을 최대 확보 */
+  .topbar{display:none}
+  .stageWrap{padding:6px 12px 0}
+  /* CTA가 버튼을 가리지 않도록 위로 올림 */
+  .cta-button{bottom:92px}
 }
 
