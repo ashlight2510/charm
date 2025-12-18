@@ -203,9 +203,50 @@ body{
 .laneBtn:active:before{opacity:1}
 .laneTag{position:relative; z-index:1}
 
+.cta-button{
+  position:fixed;
+  right:18px; bottom:18px;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 14px;
+  border-radius:16px;
+  text-decoration:none;
+  color:var(--ink);
+  font-weight:900;
+  letter-spacing:.04em;
+  background: linear-gradient(135deg, rgba(124,77,255,.86), rgba(0,229,255,.58));
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow: 0 14px 44px rgba(0,0,0,.42), 0 0 0 1px rgba(255,255,255,.12) inset;
+  backdrop-filter: blur(8px);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  z-index:60;
+}
+.cta-button:hover{
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 16px 52px rgba(0,0,0,.48), 0 0 0 1px rgba(255,255,255,.18) inset;
+  filter: saturate(1.1);
+}
+.cta-button:active{transform: translateY(1px) scale(0.995)}
+.cta-label{font-size:14px; color:rgba(233,236,255,.96)}
+.cta-arrow{
+  font-size:16px;
+  color:rgba(233,236,255,.96);
+  transition: transform .15s ease;
+}
+.cta-button:hover .cta-arrow{transform: translate(2px, -2px)}
+
 @media (max-height: 750px){
   .topbar{padding:10px 12px}
   .controls{padding:8px 12px 12px}
 }
 
+@media (max-width: 640px){
+  .cta-button{
+    right:12px; bottom:12px;
+    padding:11px 12px;
+    gap:8px;
+  }
+  .cta-label{font-size:13px}
+}
 

@@ -4,9 +4,45 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#070812" />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <meta
+      name="description"
+      content="네온 아케이드 3레인 회피 게임 ‘참참참! (Neon)’. 미사일(레이저)을 피하고 콤보로 생존해 점수를 올리세요."
+    />
+    <meta
+      property="og:image"
+      content="https://dummyimage.com/1200x630/1f2937/f9fafb&text=Charm+X3"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content="참참참! (Neon) - 3레인 회피 게임" />
+    <meta
+      property="og:description"
+      content="네온 아케이드 3레인 회피 게임. 미사일(레이저)을 피하고 콤보로 생존해 점수를 올리세요."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="참참참! (Neon) - 3레인 회피 게임" />
+    <meta
+      name="twitter:description"
+      content="네온 아케이드 3레인 회피 게임. 미사일(레이저)을 피하고 콤보로 생존해 점수를 올리세요."
+    />
     <title>참참참! (Neon)</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="sitemap" type="application/xml" href="./sitemap.xml" />
     <link rel="preconnect" href="." />
     <link rel="stylesheet" href="./style.css" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "참참참! (Neon)",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Any",
+        "inLanguage": "ko-KR",
+        "description": "네온 아케이드 3레인 회피 게임. 미사일(레이저)을 피하고 콤보로 생존해 점수를 올리세요."
+      }
+    </script>
   </head>
   <body>
     <div class="app">
@@ -88,6 +124,20 @@
       </footer>
     </div>
 
+    <a
+      class="cta-button"
+      href="https://funnyfunny.cloud/"
+      target="_blank"
+      rel="noopener noreferrer"
+      role="button"
+      aria-label="다른 서비스 보기 (새 창)"
+    >
+      <span class="cta-label">다른 서비스 보기</span>
+      <span aria-hidden="true" class="cta-arrow">↗</span>
+    </a>
+
+    <!-- Supabase (Ranking) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script defer src="./script.js"></script>
   </body>
 </html>

@@ -15,6 +15,70 @@
 
   const laneBtns = [...document.querySelectorAll(".laneBtn")];
 
+  // ---------- Ranking (Supabase)
+  // NOTE: 브라우저 클라이언트에서 쓰는 "anon key"만 사용하세요.
+  // 설정 방법:
+  // - DevTools 콘솔에서 아래 두 줄 실행 후 새로고침:
+  //   localStorage.setItem("SB_URL", "https://xxxx.supabase.co");
+  //   localStorage.setItem("SB_ANON_KEY", "YOUR_ANON_KEY");
+  // 기본값: 유저가 제공한 프로젝트(필요시 localStorage로 override 가능)
+  const DEFAULT_SB_URL = "https://mawljjaittsnoyotxqhm.supabase.co";
+  const DEFAULT_SB_ANON_KEY =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hd2xqamFpdHRzbm95b3R4cWhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwMjIwNTgsImV4cCI6MjA4MTU5ODA1OH0.jzF9IqDtx6hcHwaWfjaT6GvG2jE7lotSaQMUdnRhaAM";
+
+  const SB_URL = localStorage.getItem("SB_URL") || DEFAULT_SB_URL;
+  const SB_ANON_KEY =
+    localStorage.getItem("SB_ANON_KEY") || DEFAULT_SB_ANON_KEY;
+  const RANKING_TABLE = "rankings";
+  const FN_LEADERBOARD = "leaderboard";
+  // 같은 Supabase 프로젝트에서 여러 게임이 돌면 game_id로 분리
+  // 예) run 게임에서는 localStorage.setItem("SB_GAME_ID", "run")
+  const SB_GAME_ID = localStorage.getItem("SB_GAME_ID") || "charm";
+
+  /** @returns {import("@supabase/supabase-js").SupabaseClient | null} */
+  function getSupabase() {
+    const g = /** @type {any} */ (window);
+    const lib = g.supabase;
+    if (!lib?.createClient) return null;
+    if (!SB_URL || !SB_ANON_KEY) return null;
+    if (!getSupabase._client) {
+      getSupabase._client = lib.createClient(SB_URL, SB_ANON_KEY, {
+        auth: { persistSession: false },
+      });
+    }
+    return getSupabase._client;
+  }
+  getSupabase._client = null;
+
+  function getFunctionsBase() {
+    if (!SB_URL) return "";
+    return `${SB_URL.replace(/\/+$/, "")}/functions/v1`;
+  }
+
+  async function callFn(path, { method = "GET", body = null } = {}) {
+    const base = getFunctionsBase();
+    if (!base || !SB_ANON_KEY)
+      return { ok: false, error: "SUPABASE_NOT_CONFIGURED" };
+    const res = await fetch(`${base}/${FN_LEADERBOARD}${path}`, {
+      method,
+      headers: {
+        apikey: SB_ANON_KEY,
+        Authorization: `Bearer ${SB_ANON_KEY}`,
+        ...(body ? { "content-type": "application/json" } : {}),
+      },
+      body: body ? JSON.stringify(body) : null,
+    });
+    let json = null;
+    try {
+      json = await res.json();
+    } catch {
+      // ignore
+    }
+    if (!res.ok)
+      return { ok: false, error: json?.error || `HTTP_${res.status}` };
+    return json || { ok: true };
+  }
+
   // ---------- utils
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lerp = (a, b, t) => a + (b - a) * t;
@@ -126,6 +190,22 @@
     { x: W * 0.76, label: "RIGHT" },
   ];
 
+  // UI layout constants (canvas space)
+  const UI_PAD_Y = H * 0.79;
+  const UI_PAD_W = 176;
+  const UI_PAD_H = 66;
+  const PLAYER_R = 26;
+  const PLAYER_PAD_GAP = 5; // 패드 위로 5px 띄움
+  const HIT_Y_OFFSET = 12; // "맞는 위치"를 공보다 살짝 아래로
+  function getPlayerBaseY() {
+    // 공이 패드 상단과 5px 간격을 유지하도록 배치
+    const padTop = UI_PAD_Y - UI_PAD_H / 2;
+    return padTop - PLAYER_PAD_GAP - PLAYER_R;
+  }
+  function getHitY() {
+    return getPlayerBaseY() + HIT_Y_OFFSET;
+  }
+
   const qPorts = [
     { x: W * 0.24, label: "???" },
     { x: W * 0.5, label: "???" },
@@ -233,6 +313,8 @@
     state.score += 120 + Math.floor(state.round * 7) + state.combo * 10;
     state.combo += 1;
     state.bestCombo = Math.max(state.bestCombo, state.combo);
+    // 3콤보마다 라이프 +1
+    if (state.combo % 3 === 0) state.life = clamp(state.life + 1, 0, 9);
     state.flash = Math.max(state.flash, 0.3);
     sfxWin();
     burstAtLane(state.player.lane, "good");
@@ -281,7 +363,14 @@
         <p class="muted">SCORE: <b>${state.score}</b> · BEST COMBO: <b>${
         state.bestCombo
       }</b></p>
-        <p class="muted">다시 한 판? START를 눌러!</p>
+        <div style="margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+          <input id="playerName" maxlength="16" placeholder="이름 (최대 16)" 
+            style="flex:1; min-width:170px; padding:12px 12px; border-radius:14px; border:1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06); color: rgba(233,236,255,.92); font-weight:800; letter-spacing:.02em; outline:none" />
+          <button id="btnSubmitScore" class="btn primary" style="flex:0 0 auto; min-width:160px">랭킹 등록</button>
+        </div>
+        <p id="rankStatus" class="muted" style="margin-top:8px"></p>
+        <div id="leaderboard" style="margin-top:10px"></div>
+        <p class="muted" style="margin-top:10px">다시 한 판? START를 눌러!</p>
       `;
     }
     if (actions) {
@@ -289,6 +378,184 @@
       if (start) start.textContent = "RESTART";
     }
     setOverlayVisible(true, "결과");
+    wireGameOverRankingUI();
+  }
+
+  function safeName(raw) {
+    const s = String(raw ?? "").trim();
+    if (!s) return "PLAYER";
+    return s.replace(/\s+/g, " ").slice(0, 16);
+  }
+
+  async function fetchLeaderboard(limit = 10) {
+    // legacy kept (all-time). Prefer fetchLeaderboardScoped().
+    return fetchLeaderboardScoped("all", limit);
+  }
+
+  async function fetchLeaderboardScoped(scope = "all", limit = 10) {
+    // 1) Edge Function (권장): 일간/주간/전체 + 서버 검증 기반
+    const fn = await callFn(
+      `?scope=${encodeURIComponent(scope)}&limit=${encodeURIComponent(
+        limit
+      )}&game_id=${encodeURIComponent(SB_GAME_ID)}`
+    );
+    if (fn?.ok)
+      return {
+        ok: true,
+        reason: null,
+        rows: fn.rows || [],
+        scope: fn.scope || scope,
+      };
+
+    // 2) Fallback: direct select (all-time only; 치팅 방지/기간 필터 없음)
+    const sb = getSupabase();
+    if (!sb) return { ok: false, reason: "SUPABASE_NOT_CONFIGURED", rows: [] };
+    const { data, error } = await sb
+      .from(RANKING_TABLE)
+      .select("name, score, best_combo, round, updated_at")
+      .order("score", { ascending: false })
+      .order("updated_at", { ascending: false })
+      .limit(limit);
+    if (error) return { ok: false, reason: error.message, rows: [] };
+    return { ok: true, reason: null, rows: data || [], scope: "all" };
+  }
+
+  async function submitScore(name) {
+    const payload = {
+      game_id: SB_GAME_ID,
+      name: safeName(name),
+      score: state.score,
+      best_combo: state.bestCombo,
+      round: state.round,
+    };
+
+    // 1) Edge Function upsert + server-side validation
+    const fn = await callFn("/submit", { method: "POST", body: payload });
+    if (fn?.ok) return { ok: true, reason: null };
+
+    // 2) Fallback: direct upsert (requires DB unique constraint to behave correctly)
+    const sb = getSupabase();
+    if (!sb) return { ok: false, reason: "SUPABASE_NOT_CONFIGURED" };
+    const name_key = payload.name.toLowerCase();
+    const { error } = await sb
+      .from(RANKING_TABLE)
+      .upsert(
+        { ...payload, name_key, updated_at: new Date().toISOString() },
+        { onConflict: "game_id,name_key" }
+      );
+    if (error) return { ok: false, reason: error.message };
+    return { ok: true, reason: null };
+  }
+
+  function renderLeaderboard(el, rows) {
+    if (!el) return;
+    if (!rows?.length) {
+      el.innerHTML =
+        '<div class="muted" style="opacity:.9">아직 랭킹이 없어요.</div>';
+      return;
+    }
+    const items = rows
+      .map((r, i) => {
+        const nm = escapeHtml(r.name ?? "PLAYER");
+        const sc = Number(r.score ?? 0);
+        const bc = Number(r.best_combo ?? 0);
+        const rd = Number(r.round ?? 0);
+        return `
+          <div style="display:flex; justify-content:space-between; gap:10px; padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04); margin:8px 0">
+            <div style="display:flex; gap:10px; align-items:baseline">
+              <div style="font-weight:900; opacity:.85; min-width:34px">#${
+                i + 1
+              }</div>
+              <div style="font-weight:900">${nm}</div>
+              <div class="muted" style="font-size:12px">R${rd} · C${bc}</div>
+            </div>
+            <div style="font-weight:900">${sc}</div>
+          </div>
+        `;
+      })
+      .join("");
+    el.innerHTML = `
+      <div style="font-weight:900; letter-spacing:.08em; font-size:12px; opacity:.9; margin-bottom:6px">LEADERBOARD</div>
+      ${items}
+    `;
+  }
+
+  function setRankStatus(msg) {
+    const el = $overlay.querySelector("#rankStatus");
+    if (el) el.textContent = msg || "";
+  }
+
+  async function wireGameOverRankingUI() {
+    const input = /** @type {HTMLInputElement|null} */ (
+      $overlay.querySelector("#playerName")
+    );
+    const btn = $overlay.querySelector("#btnSubmitScore");
+    const board = $overlay.querySelector("#leaderboard");
+    const body = $overlay.querySelector(".cardBody");
+    if (input) input.value = localStorage.getItem("PLAYER_NAME") || "";
+
+    // scope tabs
+    if (body && !body.querySelector("#rankTabs")) {
+      const tabs = document.createElement("div");
+      tabs.id = "rankTabs";
+      tabs.style.cssText =
+        "display:flex; gap:8px; margin-top:10px; flex-wrap:wrap";
+      tabs.innerHTML = `
+        <button data-scope="all" class="btn" style="flex:0 0 auto; padding:10px 12px">전체</button>
+        <button data-scope="daily" class="btn" style="flex:0 0 auto; padding:10px 12px">오늘</button>
+        <button data-scope="weekly" class="btn" style="flex:0 0 auto; padding:10px 12px">이번주</button>
+      `;
+      const status = body.querySelector("#rankStatus");
+      status?.parentElement?.insertBefore(tabs, status);
+    }
+
+    // 초기 로드
+    const hasFn = !!getFunctionsBase() && !!SB_ANON_KEY;
+    const sb = getSupabase();
+    if (!hasFn && !sb) {
+      setRankStatus(
+        "랭킹 사용하려면 Supabase 설정이 필요해요. (SB_URL / SB_ANON_KEY)"
+      );
+      renderLeaderboard(board, []);
+      return;
+    }
+
+    let currentScope = "all";
+    async function load(scope) {
+      currentScope = scope || "all";
+      setRankStatus("랭킹 불러오는 중...");
+      const res = await fetchLeaderboardScoped(currentScope, 10);
+      if (res.ok) {
+        setRankStatus("");
+        renderLeaderboard(board, res.rows);
+      } else {
+        setRankStatus(`랭킹 로드 실패: ${res.reason}`);
+        renderLeaderboard(board, []);
+      }
+    }
+
+    // hook tab clicks
+    $overlay.querySelectorAll("#rankTabs [data-scope]").forEach((b) => {
+      b.onclick = () => load(b.getAttribute("data-scope"));
+    });
+
+    await load(currentScope);
+
+    if (btn) {
+      btn.onclick = async () => {
+        const name = safeName(input?.value || "");
+        localStorage.setItem("PLAYER_NAME", name);
+        setRankStatus("등록 중...");
+        const out = await submitScore(name);
+        if (!out.ok) {
+          setRankStatus(`등록 실패: ${out.reason}`);
+          return;
+        }
+        setRankStatus("등록 완료!");
+        const next = await fetchLeaderboardScoped(currentScope, 10);
+        if (next.ok) renderLeaderboard(board, next.rows);
+      };
+    }
   }
 
   function escapeHtml(s) {
@@ -315,7 +582,8 @@
     const x = lanes[lane].x;
     const y = H * 0.78;
     const col = palette[lane];
-    const n = kind === "good" ? 58 : 78;
+    // 피격 순간 프레임 드랍 방지: 파티클 수를 조금 줄임
+    const n = kind === "good" ? 48 : 54;
     for (let i = 0; i < n; i++) {
       const a = rand(0, Math.PI * 2);
       const sp =
@@ -450,12 +718,12 @@
   function drawPlayerBall(tNow) {
     // 플레이어는 현재 lane 위치에 존재
     const x = lanes[state.player.lane].x;
-    const baseY = H * 0.86;
+    const baseY = getPlayerBaseY();
     const hit = state.player.status === "hit";
     const k = hit ? clamp(state.player.hitT / state.player.hitDur, 0, 1) : 0;
     // 맞으면: 뒤로 젖혀지고(위로 튕김) + 약간 옆으로 흔들 + 회전 느낌(빛 링)
     const y = baseY - (hit ? Math.sin(k * Math.PI) * 110 + k * 40 : 0);
-    const r = 26;
+    const r = PLAYER_R;
     const lifeMax = 9;
     const ratio = clamp(state.life / lifeMax, 0, 1);
 
@@ -580,15 +848,15 @@
 
       // base pads
       // 요청: LEFT/MID/RIGHT 패드를 조금 위로
-      const baseY = H * 0.79;
+      const baseY = UI_PAD_Y;
       const col = palette[i];
       const isPlayer = i === state.player.lane;
       const hot = isPlayer ? 1 : 0.35;
       const glow = isPlayer ? 34 : 20;
       ctx.globalAlpha = 0.95;
       setShadow(isPlayer ? col.b : "rgba(124,77,255,0.35)", glow);
-      const bw = 176,
-        bh = 66;
+      const bw = UI_PAD_W,
+        bh = UI_PAD_H;
       roundedRect(x - bw / 2, baseY - bh / 2, bw, bh, 18);
       const grad = ctx.createLinearGradient(
         x - bw / 2,
@@ -706,40 +974,33 @@
   }
 
   function drawQPorts() {
-    const y = 150;
-    ctx.save();
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font =
-      "900 28px ui-sans-serif, system-ui, -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR'";
-    for (let i = 0; i < 3; i++) {
-      const x = qPorts[i].x;
-      // 위쪽 포탈은 "어디서 쏠지 모름" 느낌만 유지 (특정 라인 노출 X)
-      const isHot = false;
-      const col = palette[i];
-      const glow = isHot ? 34 : 18;
-      const a = isHot ? 0.92 : 0.65;
-      // portal ring
-      ctx.save();
-      ctx.globalCompositeOperation = "lighter";
-      setShadow(isHot ? withAlpha(col.b, 0.7) : "rgba(124,77,255,0.25)", glow);
-      ctx.strokeStyle = withAlpha(isHot ? col.b : col.a, 0.55);
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(x, y, 34, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = "rgba(0,0,0,0.28)";
-      ctx.beginPath();
-      ctx.arc(x, y, 28, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
+    // 요청: ??? 박스는 더 이상 표시하지 않음
+  }
 
-      // ???
-      ctx.globalAlpha = a;
-      setShadow(withAlpha(col.b, 0.6), isHot ? 22 : 14);
-      ctx.fillStyle = "rgba(233,236,255,0.80)";
-      ctx.fillText("???", x, y + 2);
+  function drawHitMarkers(tNow) {
+    const y = getHitY();
+    const wobble = 0.6 + 0.4 * Math.sin(tNow * 0.006);
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    for (let i = 0; i < 3; i++) {
+      const x = lanes[i].x;
+      const col = palette[i];
+      const a = 0.22 + 0.1 * wobble;
+      setShadow(withAlpha(col.b, a), 18);
+      ctx.strokeStyle = withAlpha(col.b, a);
+      ctx.lineWidth = 2.5;
+      // 작은 브라켓( ) 모양의 타겟 마커
+      ctx.beginPath();
+      ctx.arc(x, y, 22, Math.PI * 0.15, Math.PI * 0.85);
+      ctx.arc(x, y, 22, Math.PI * 1.15, Math.PI * 1.85);
+      ctx.stroke();
+
+      // 중앙 점
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = withAlpha(col.a, 0.18 + 0.12 * wobble);
+      ctx.beginPath();
+      ctx.arc(x, y, 2.2, 0, Math.PI * 2);
+      ctx.fill();
     }
     ctx.restore();
   }
@@ -868,7 +1129,6 @@
     ctx.restore();
 
     // world elements
-    drawQPorts();
     drawStreaks(dt);
     drawMissile(tNow);
     drawParticles(dt);
@@ -879,6 +1139,7 @@
     ctx.translate(sx, sy);
     drawLifeHearts();
     drawHUDbar();
+    drawHitMarkers(tNow);
     drawLanes();
     drawPlayerBall(tNow);
     drawScanlines(0.1);
@@ -922,7 +1183,9 @@
   // ---------- main loop
   let last = performance.now();
   function frame(now) {
-    const dt = clamp((now - last) / 1000, 0, 0.033);
+    // dt를 너무 타이트하게(0.033) 자르면 프레임이 밀릴 때 "끊기는 느낌"이 날 수 있어서
+    // 약간 여유를 주고(0.05) 연산 폭증은 clamp로 막음
+    const dt = clamp((now - last) / 1000, 0, 0.05);
     last = now;
 
     // hit animation timeline
@@ -969,7 +1232,7 @@
       m.y += m.vy * dt;
 
       // collision with player (same lane + y overlap)
-      const playerY = H * 0.86 - (state.player.status === "hit" ? 90 : 0);
+      const playerY = getHitY() - (state.player.status === "hit" ? 90 : 0);
       if (state.player.status === "alive" && m.lane === state.player.lane) {
         const dy = Math.abs(m.y - playerY);
         if (dy < 44) {
@@ -990,7 +1253,8 @@
       }
     }
 
-    spawnAmbient();
+    // 피격 순간엔 잔먼지 FX를 줄여 프레임 드랍을 방지
+    if (state.player.status !== "hit") spawnAmbient();
     drawFrame(now, dt);
     requestAnimationFrame(frame);
   }
