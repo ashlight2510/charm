@@ -1,0 +1,211 @@
+:root{
+  --bg0:#05060f;
+  --bg1:#0b0e24;
+  --ink:#e9ecff;
+  --muted:#98a0c9;
+  --c1:#7c4dff;
+  --c2:#00e5ff;
+  --c3:#ff2bd6;
+  --line:rgba(255,255,255,.10);
+  --glass:rgba(14,16,40,.62);
+  --shadow: 0 14px 60px rgba(0,0,0,.55);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color:var(--ink);
+  background:
+    radial-gradient(1200px 800px at 20% 10%, rgba(124,77,255,.28), transparent 60%),
+    radial-gradient(900px 700px at 90% 30%, rgba(0,229,255,.18), transparent 55%),
+    radial-gradient(900px 700px at 60% 95%, rgba(255,43,214,.12), transparent 55%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+  overflow:hidden;
+}
+
+.app{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px;
+  gap:12px;
+}
+
+.brand{display:flex; align-items:center; gap:12px}
+.logo{
+  width:40px; height:40px; border-radius:14px;
+  background:
+    radial-gradient(10px 10px at 30% 35%, rgba(255,255,255,.9), transparent 60%),
+    radial-gradient(40px 40px at 70% 75%, rgba(0,229,255,.55), transparent 60%),
+    radial-gradient(42px 42px at 30% 80%, rgba(124,77,255,.55), transparent 62%),
+    linear-gradient(135deg, rgba(255,43,214,.45), rgba(0,229,255,.18));
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.12) inset,
+    0 18px 40px rgba(0,0,0,.45);
+  position:relative;
+  overflow:hidden;
+}
+.logo:after{
+  content:"";
+  position:absolute; inset:-60%;
+  background: conic-gradient(from 180deg, rgba(0,229,255,.0), rgba(0,229,255,.35), rgba(255,43,214,.25), rgba(0,229,255,.0));
+  animation: spin 4.2s linear infinite;
+  filter: blur(10px);
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.title .kicker{font-size:11px; letter-spacing:.12em; color:var(--muted)}
+.title .name{font-size:18px; font-weight:800; letter-spacing:.02em}
+
+.hud{display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end}
+.pill{
+  padding:9px 10px;
+  border-radius:14px;
+  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  min-width:86px;
+}
+.pillLabel{font-size:10px; letter-spacing:.14em; color:var(--muted)}
+.pillValue{font-size:16px; font-weight:800; margin-top:2px}
+
+.stageWrap{
+  position:relative;
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 16px 0;
+}
+
+.stage{
+  width:min(520px, 100%);
+  height:auto;
+  aspect-ratio: 3/5;
+  border-radius:26px;
+  background: rgba(2,3,10,.35);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow: var(--shadow);
+}
+
+.overlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  pointer-events:auto;
+}
+.overlay.hidden{display:none}
+.card{
+  width:min(520px, 100%);
+  border-radius:22px;
+  background: radial-gradient(600px 420px at 20% 10%, rgba(124,77,255,.18), transparent 60%),
+              radial-gradient(500px 400px at 90% 30%, rgba(0,229,255,.12), transparent 55%),
+              linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow: 0 18px 70px rgba(0,0,0,.55);
+  padding:16px 16px 12px;
+  backdrop-filter: blur(10px);
+}
+.cardTitle{
+  font-weight:900;
+  letter-spacing:.08em;
+  font-size:12px;
+  color:rgba(233,236,255,.88);
+}
+.cardBody{
+  margin-top:10px;
+  color:rgba(233,236,255,.92);
+  line-height:1.5;
+}
+.cardBody p{margin:8px 0}
+.muted{color:var(--muted)}
+.cardActions{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+}
+.btn{
+  appearance:none;
+  border:none;
+  border-radius:14px;
+  padding:12px 14px;
+  font-weight:900;
+  letter-spacing:.06em;
+  color:rgba(233,236,255,.92);
+  background: rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  cursor:pointer;
+  flex:1;
+}
+.btn:active{transform: translateY(1px)}
+.btn.primary{
+  background: linear-gradient(135deg, rgba(124,77,255,.72), rgba(0,229,255,.34));
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow: 0 10px 34px rgba(124,77,255,.20), 0 8px 30px rgba(0,229,255,.12);
+}
+.hint{
+  margin-top:10px;
+  font-size:12px;
+  color:rgba(152,160,201,.92);
+}
+
+.controls{
+  padding:10px 16px 16px;
+  display:flex;
+  gap:10px;
+  align-items:stretch;
+  justify-content:center;
+}
+.laneBtn{
+  flex:1;
+  max-width:220px;
+  border-radius:18px;
+  padding:14px 10px;
+  background:
+    radial-gradient(120px 90px at 20% 20%, rgba(0,229,255,.18), transparent 60%),
+    radial-gradient(120px 90px at 80% 70%, rgba(255,43,214,.12), transparent 60%),
+    rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.14);
+  color:rgba(233,236,255,.92);
+  font-weight:900;
+  letter-spacing:.12em;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+}
+.laneBtn.active{
+  transform: translateY(-1px) scale(0.99);
+  border-color: rgba(255,255,255,.22);
+  box-shadow: 0 12px 36px rgba(0,0,0,.30), 0 0 0 1px rgba(0,229,255,.10) inset;
+}
+.laneBtn:before{
+  content:"";
+  position:absolute;
+  inset:-40%;
+  background: conic-gradient(from 90deg, rgba(124,77,255,.0), rgba(124,77,255,.16), rgba(0,229,255,.12), rgba(255,43,214,.10), rgba(124,77,255,.0));
+  filter: blur(18px);
+  opacity:.0;
+  transition: opacity .18s ease;
+}
+.laneBtn:hover:before{opacity:.9}
+.laneBtn:active{transform: translateY(1px)}
+.laneBtn:active:before{opacity:1}
+.laneTag{position:relative; z-index:1}
+
+@media (max-height: 750px){
+  .topbar{padding:10px 12px}
+  .controls{padding:8px 12px 12px}
+}
+
+

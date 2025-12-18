@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#070812" />
+    <title>참참참! (Neon)</title>
+    <link rel="preconnect" href="." />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo"></div>
+          <div class="title">
+            <div class="kicker">NEON ARCADE</div>
+            <div class="name">참참참!</div>
+          </div>
+        </div>
+
+        <div class="hud">
+          <div class="pill">
+            <div class="pillLabel">SCORE</div>
+            <div id="score" class="pillValue">0</div>
+          </div>
+          <div class="pill">
+            <div class="pillLabel">LIFE</div>
+            <div id="life" class="pillValue">3</div>
+          </div>
+          <div class="pill">
+            <div class="pillLabel">ROUND</div>
+            <div id="round" class="pillValue">1</div>
+          </div>
+        </div>
+      </header>
+
+      <main class="stageWrap">
+        <canvas
+          id="game"
+          class="stage"
+          width="900"
+          height="1500"
+          aria-label="참참참 게임"
+        ></canvas>
+
+        <div id="overlay" class="overlay">
+          <div class="card">
+            <div class="cardTitle">규칙</div>
+            <div class="cardBody">
+              <p>
+                <b>정체모를 미사일</b>이 랜덤 라인에서 <b>아래 → 위</b>로
+                발사됩니다.
+              </p>
+              <p>
+                플레이어는 <b>라인만 바꿔서</b> 미사일을 <b>피하기</b>만 하면
+                돼요.
+              </p>
+              <p>
+                같은 라인에서 맞으면 <b>OUT</b> (라이프 -1, 0이면 게임오버).
+              </p>
+              <p class="muted">
+                피하면 통과한 것처럼 <b>화면이 아래로 내려가는</b> 연출이
+                나옵니다.
+              </p>
+            </div>
+            <div class="cardActions">
+              <button id="btnStart" class="btn primary">START</button>
+              <button id="btnMute" class="btn">SFX ON</button>
+            </div>
+            <div class="hint">
+              키보드: ← / ↓ / → 또는 A / S / D · 모바일: 아래 버튼 터치
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="controls" aria-label="컨트롤">
+        <button class="laneBtn" data-lane="0" aria-label="왼쪽 라인 선택">
+          <span class="laneTag">LEFT</span>
+        </button>
+        <button class="laneBtn" data-lane="1" aria-label="가운데 라인 선택">
+          <span class="laneTag">MID</span>
+        </button>
+        <button class="laneBtn" data-lane="2" aria-label="오른쪽 라인 선택">
+          <span class="laneTag">RIGHT</span>
+        </button>
+      </footer>
+    </div>
+
+    <script defer src="./script.js"></script>
+  </body>
+</html>
