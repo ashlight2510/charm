@@ -8,6 +8,13 @@
 //
 // This function uses service role to write/read rankings securely.
 // Client still passes anon key for authorization header, but DB writes are validated here.
+//
+// NOTE:
+// 이 파일은 "Supabase Edge Function(Deno)"용입니다.
+// 에디터(TypeScript 서버/tsc)는 아래 `https://esm.sh/...` import를 못 찾아서
+// 경고가 뜰 수 있지만, 배포/실행에는 정상입니다.
+// (경고가 거슬리면 Deno 확장 사용 or 아래 @ts-nocheck 유지)
+// @ts-nocheck
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -161,9 +168,13 @@ Deno.serve(async (req) => {
 
   // POST https://<project>.supabase.co/functions/v1/leaderboard/submit
   if (req.method === "POST" && path.endsWith("/leaderboard/submit")) {
+    // 프론트에서 CORS preflight를 피하려고 text/plain으로 보냄
+    // (JSON도 허용)
     let body: any = null;
     try {
-      body = await req.json();
+      const ct = req.headers.get("content-type") || "";
+      if (ct.includes("application/json")) body = await req.json();
+      else body = JSON.parse(await req.text());
     } catch {
       return json({ ok: false, error: "BAD_JSON" }, 400);
     }

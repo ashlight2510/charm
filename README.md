@@ -81,3 +81,6 @@ Supabase CLI로 배포:
 ```bash
 supabase functions deploy leaderboard
 ```
+
+> 참고: 이 함수는 브라우저 CORS preflight 이슈를 피하려고 `verify_jwt = false`(공개)로 동작합니다.
+> 대신 서버에서 점수/라운드/콤보 검증 + 레이트리밋을 수행합니다.

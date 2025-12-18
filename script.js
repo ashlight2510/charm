@@ -57,15 +57,14 @@
 
   async function callFn(path, { method = "GET", body = null } = {}) {
     const base = getFunctionsBase();
-    if (!base || !SB_ANON_KEY)
-      return { ok: false, error: "SUPABASE_NOT_CONFIGURED" };
+    if (!base) return { ok: false, error: "SUPABASE_NOT_CONFIGURED" };
+    // CORS preflight(OPTIONS) 회피:
+    // - GET: 커스텀 헤더 없이 호출
+    // - POST: Content-Type을 text/plain으로 보내면 "simple request"로 preflight 없이 동작
+    const isPost = method.toUpperCase() === "POST";
     const res = await fetch(`${base}/${FN_LEADERBOARD}${path}`, {
       method,
-      headers: {
-        apikey: SB_ANON_KEY,
-        Authorization: `Bearer ${SB_ANON_KEY}`,
-        ...(body ? { "content-type": "application/json" } : {}),
-      },
+      headers: isPost ? { "content-type": "text/plain;charset=UTF-8" } : {},
       body: body ? JSON.stringify(body) : null,
     });
     let json = null;
@@ -652,14 +651,15 @@
   }
 
   function drawHUDbar() {
-    // 이제 타이머 기반 선택이 아니라, "다음 미사일 발사까지" 카운트다운 느낌으로 바
+    // 라이프 +1까지의 진행도 바 (3콤보당 1라이프)
     const pad = 44;
     const w = W - pad * 2;
     const h = 16;
     const x = pad;
     const y = 74;
-    const max = 1.05;
-    const t = clamp(1 - state.nextSpawnIn / max, 0, 1);
+    // combo: 0,1,2 -> 0/3, 1/3, 2/3 진행
+    const progress = (state.combo % 3) / 3;
+    const t = clamp(progress, 0, 1);
 
     ctx.save();
     roundedRect(x, y, w, h, 10);
@@ -668,7 +668,7 @@
     ctx.strokeStyle = "rgba(255,255,255,0.12)";
     ctx.stroke();
 
-    const col = t < 0.65 ? "rgba(0,229,255,0.85)" : "rgba(255,43,214,0.90)";
+    const col = t < 0.66 ? "rgba(0,229,255,0.85)" : "rgba(255,43,214,0.90)";
     setShadow(col, 18);
     roundedRect(x, y, w * t, h, 10);
     ctx.fillStyle = col;
@@ -677,7 +677,9 @@
     ctx.shadowBlur = 0;
     ctx.globalAlpha = 0.55;
     ctx.fillStyle = "rgba(255,255,255,0.28)";
-    for (let i = 1; i < 5; i++) ctx.fillRect(x + (w * i) / 5, y + 2, 1, h - 4);
+    // 3등분(1/3, 2/3) 마커
+    ctx.fillRect(x + w / 3, y + 2, 1, h - 4);
+    ctx.fillRect(x + (w * 2) / 3, y + 2, 1, h - 4);
     ctx.restore();
   }
 
