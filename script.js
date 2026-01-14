@@ -354,29 +354,30 @@
   }
 
   function showGameOver(reason) {
+    const t = window.t || ((key, vars = {}) => key);
     const body = $overlay.querySelector(".cardBody");
     const actions = $overlay.querySelector(".cardActions");
     if (body) {
       body.innerHTML = `
-        <p><b>GAME OVER</b> · ${escapeHtml(reason)}</p>
-        <p class="muted">SCORE: <b>${state.score}</b> · BEST COMBO: <b>${
+        <p><b>${t("gameOver")}</b> · ${escapeHtml(reason)}</p>
+        <p class="muted">${t("labelScore")}: <b>${state.score}</b> · ${t("bestCombo")}: <b>${
         state.bestCombo
       }</b></p>
         <div style="margin-top:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap">
-          <input id="playerName" maxlength="16" placeholder="이름 (최대 16)" 
+          <input id="playerName" maxlength="16" placeholder="${t("namePlaceholder")}" 
             style="flex:1; min-width:170px; padding:12px 12px; border-radius:14px; border:1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06); color: rgba(233,236,255,.92); font-weight:800; letter-spacing:.02em; outline:none" />
-          <button id="btnSubmitScore" class="btn primary" style="flex:0 0 auto; min-width:160px">랭킹 등록</button>
+          <button id="btnSubmitScore" class="btn primary" style="flex:0 0 auto; min-width:160px">${t("btnSubmitScore")}</button>
         </div>
         <p id="rankStatus" class="muted" style="margin-top:8px"></p>
         <div id="leaderboard" style="margin-top:10px"></div>
-        <p class="muted" style="margin-top:10px">다시 한 판? START를 눌러!</p>
+        <p class="muted" style="margin-top:10px">${t("playAgain")}</p>
       `;
     }
     if (actions) {
       const start = actions.querySelector("#btnStart");
-      if (start) start.textContent = "RESTART";
+      if (start) start.textContent = t("btnRestart");
     }
-    setOverlayVisible(true, "결과");
+    setOverlayVisible(true, t("resultTitle"));
     wireGameOverRankingUI();
   }
 
@@ -1238,7 +1239,8 @@
       if (state.player.status === "alive" && m.lane === state.player.lane) {
         const dy = Math.abs(m.y - playerY);
         if (dy < 44) {
-          fail("레이저 맞음");
+          const t = window.t || ((key, vars = {}) => key);
+          fail(t("hitByLaser"));
         }
       }
 
@@ -1310,7 +1312,8 @@
 
   $btnMute.addEventListener("click", () => {
     sfxEnabled = !sfxEnabled;
-    $btnMute.textContent = sfxEnabled ? "SFX ON" : "SFX OFF";
+    const t = window.t || ((key, vars = {}) => key);
+    $btnMute.textContent = sfxEnabled ? t("btnMute") : t("btnMuteOff");
     if (sfxEnabled)
       beep({ f: 520, t: 0.05, type: "triangle", g: 0.05, sweep: 240 });
   });
@@ -1325,5 +1328,6 @@
   );
 
   // initial render state
-  setOverlayVisible(true, "규칙");
+  const t = window.t || ((key, vars = {}) => key);
+  setOverlayVisible(true, t("rulesTitle"));
 })();

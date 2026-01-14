@@ -82,28 +82,72 @@
         text-align: center;
 }
   </style>
+  <style>
+    .lang-switch {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      display: inline-flex;
+      gap: 0;
+      padding: 3px;
+      border-radius: 999px;
+      background: rgba(7, 8, 18, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .lang-switch button {
+      border: none;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 44px;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+    .lang-switch button.active {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(255, 255, 255, 0.4);
+    }
+    .lang-switch button:not(.active):hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.9);
+    }
+  </style>
 </head>
-  <body><div class="app">
+  <body>
+  <div class="lang-switch" role="tablist" aria-label="Language switcher">
+    <button type="button" data-lang="ko" class="active">KR</button>
+    <button type="button" data-lang="en">EN</button>
+  </div>
+  <div class="app">
       <header class="topbar">
         <div class="brand">
           <div class="logo"></div>
           <div class="title">
             <div class="kicker">NEON ARCADE</div>
-            <div class="name">참참참!</div>
+            <div class="name" data-i18n="gameName">참참참!</div>
           </div>
         </div>
 
         <div class="hud">
           <div class="pill">
-            <div class="pillLabel">SCORE</div>
+            <div class="pillLabel" data-i18n="labelScore">SCORE</div>
             <div id="score" class="pillValue">0</div>
           </div>
           <div class="pill">
-            <div class="pillLabel">LIFE</div>
+            <div class="pillLabel" data-i18n="labelLife">LIFE</div>
             <div id="life" class="pillValue">3</div>
           </div>
           <div class="pill">
-            <div class="pillLabel">ROUND</div>
+            <div class="pillLabel" data-i18n="labelRound">ROUND</div>
             <div id="round" class="pillValue">1</div>
           </div>
         </div>
@@ -120,43 +164,43 @@
 
         <div id="overlay" class="overlay">
           <div class="card">
-            <div class="cardTitle">규칙</div>
+            <div class="cardTitle" data-i18n="rulesTitle">규칙</div>
             <div class="cardBody">
-              <p>
+              <p data-i18n-html="rule1">
                 <b>정체모를 미사일</b>이 랜덤 라인에서 <b>아래 → 위</b>로
                 발사됩니다.
               </p>
-              <p>
+              <p data-i18n-html="rule2">
                 플레이어는 <b>라인만 바꿔서</b> 미사일을 <b>피하기</b>만 하면
                 돼요.
               </p>
-              <p>
+              <p data-i18n-html="rule3">
                 같은 라인에서 맞으면 <b>OUT</b> (라이프 -1, 0이면 게임오버).
               </p>
-              <p class="muted">
+              <p class="muted" data-i18n-html="rule4">
                 피하면 통과한 것처럼 <b>화면이 아래로 내려가는</b> 연출이
                 나옵니다.
               </p>
             </div>
             <div class="cardActions">
-              <button id="btnStart" class="btn primary">START</button>
-              <button id="btnMute" class="btn">SFX ON</button>
+              <button id="btnStart" class="btn primary" data-i18n="btnStart">START</button>
+              <button id="btnMute" class="btn" data-i18n="btnMute">SFX ON</button>
             </div>
-            <div class="hint">
+            <div class="hint" data-i18n="hint">
               키보드: ← / ↓ / → 또는 A / S / D · 모바일: 아래 버튼 터치
             </div>
           </div>
         </div>
       </main>
 
-      <footer class="controls" aria-label="컨트롤">
-        <button class="laneBtn" data-lane="0" aria-label="왼쪽 라인 선택">
+      <footer class="controls" data-i18n-aria="ariaControls">
+        <button class="laneBtn" data-lane="0" data-i18n-aria="ariaLeft">
           <span class="laneTag">LEFT</span>
         </button>
-        <button class="laneBtn" data-lane="1" aria-label="가운데 라인 선택">
+        <button class="laneBtn" data-lane="1" data-i18n-aria="ariaMid">
           <span class="laneTag">MID</span>
         </button>
-        <button class="laneBtn" data-lane="2" aria-label="오른쪽 라인 선택">
+        <button class="laneBtn" data-lane="2" data-i18n-aria="ariaRight">
           <span class="laneTag">RIGHT</span>
         </button>
       </footer>
@@ -168,14 +212,177 @@
       target="_blank"
       rel="noopener noreferrer"
       role="button"
-      aria-label="다른 서비스 보기 (새 창)"
+      data-i18n-aria="ariaOtherService"
     >
-      <span class="cta-label">다른 서비스 보기</span>
+      <span class="cta-label" data-i18n="btnOtherService">다른 서비스 보기</span>
       <span aria-hidden="true" class="cta-arrow">↗</span>
     </a>
 
     <!-- Supabase (Ranking) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      // =========================
+      // i18n
+      // =========================
+      const translations = {
+        ko: {
+          metaTitle: "참참참! (Neon) - 3레인 회피 게임",
+          metaDescription: "네온 아케이드 3레인 회피 게임. 미사일(레이저)을 피하고 콤보로 생존해 점수를 올리세요.",
+          gameName: "참참참!",
+          labelScore: "SCORE",
+          labelLife: "LIFE",
+          labelRound: "ROUND",
+          rulesTitle: "규칙",
+          rule1: "<b>정체모를 미사일</b>이 랜덤 라인에서 <b>아래 → 위</b>로 발사됩니다.",
+          rule2: "플레이어는 <b>라인만 바꿔서</b> 미사일을 <b>피하기</b>만 하면 돼요.",
+          rule3: "같은 라인에서 맞으면 <b>OUT</b> (라이프 -1, 0이면 게임오버).",
+          rule4: "피하면 통과한 것처럼 <b>화면이 아래로 내려가는</b> 연출이 나옵니다.",
+          btnStart: "START",
+          btnMute: "SFX ON",
+          btnMuteOff: "SFX OFF",
+          hint: "키보드: ← / ↓ / → 또는 A / S / D · 모바일: 아래 버튼 터치",
+          btnOtherService: "다른 서비스 보기",
+          ariaGame: "참참참 게임",
+          ariaControls: "컨트롤",
+          ariaLeft: "왼쪽 라인 선택",
+          ariaMid: "가운데 라인 선택",
+          ariaRight: "오른쪽 라인 선택",
+          ariaOtherService: "다른 서비스 보기 (새 창)",
+          hitByLaser: "레이저 맞음",
+          gameOver: "GAME OVER",
+          bestCombo: "BEST COMBO",
+          namePlaceholder: "이름 (최대 16)",
+          btnSubmitScore: "랭킹 등록",
+          playAgain: "다시 한 판? START를 눌러!",
+          btnRestart: "RESTART",
+          resultTitle: "결과",
+        },
+        en: {
+          metaTitle: "Charm! (Neon) - 3-Lane Dodge Game",
+          metaDescription: "Neon arcade 3-lane dodge game. Avoid missiles (lasers) and survive with combos to increase your score.",
+          gameName: "Charm!",
+          labelScore: "SCORE",
+          labelLife: "LIFE",
+          labelRound: "ROUND",
+          rulesTitle: "Rules",
+          rule1: "<b>Mysterious missiles</b> are fired from random lanes <b>bottom → top</b>.",
+          rule2: "Players just need to <b>change lanes</b> to <b>dodge</b> the missiles.",
+          rule3: "If hit on the same lane, <b>OUT</b> (life -1, game over at 0).",
+          rule4: "When dodged, the screen <b>moves down</b> as if you passed through.",
+          btnStart: "START",
+          btnMute: "SFX ON",
+          btnMuteOff: "SFX OFF",
+          hint: "Keyboard: ← / ↓ / → or A / S / D · Mobile: Tap buttons below",
+          btnOtherService: "View other services",
+          ariaGame: "Charm game",
+          ariaControls: "Controls",
+          ariaLeft: "Select left lane",
+          ariaMid: "Select middle lane",
+          ariaRight: "Select right lane",
+          ariaOtherService: "View other services (new window)",
+          hitByLaser: "Hit by laser",
+          gameOver: "GAME OVER",
+          bestCombo: "BEST COMBO",
+          namePlaceholder: "Name (max 16)",
+          btnSubmitScore: "Submit score",
+          playAgain: "Play again? Press START!",
+          btnRestart: "RESTART",
+          resultTitle: "Result",
+        },
+      };
+
+      const defaultLang = "ko";
+      const supportedLangs = ["ko", "en"];
+      let currentLang = defaultLang;
+
+      function t(key, vars = {}) {
+        const langTable = translations[currentLang] || translations.ko;
+        let template = langTable?.[key] ?? translations.ko?.[key] ?? key;
+        if (typeof template !== "string") return template;
+        Object.keys(vars).forEach((k) => {
+          template = template.replace(new RegExp(`\\{${k}\\}`, "g"), vars[k]);
+        });
+        return template;
+      }
+
+      function applyTranslations() {
+        document.title = t("metaTitle");
+        const descMeta = document.querySelector('meta[name="description"]');
+        if (descMeta) descMeta.setAttribute("content", t("metaDescription"));
+        const ogTitleMeta = document.querySelector('meta[property="og:title"]');
+        if (ogTitleMeta) ogTitleMeta.setAttribute("content", t("metaTitle"));
+        const ogDescMeta = document.querySelector('meta[property="og:description"]');
+        if (ogDescMeta) ogDescMeta.setAttribute("content", t("metaDescription"));
+        const twitterTitleMeta = document.querySelector('meta[name="twitter:title"]');
+        if (twitterTitleMeta) twitterTitleMeta.setAttribute("content", t("metaTitle"));
+        const twitterDescMeta = document.querySelector('meta[name="twitter:description"]');
+        if (twitterDescMeta) twitterDescMeta.setAttribute("content", t("metaDescription"));
+        document.documentElement.lang = currentLang;
+        document.querySelectorAll("[data-i18n]").forEach((el) => {
+          el.textContent = t(el.dataset.i18n);
+        });
+        document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+          el.innerHTML = t(el.dataset.i18nHtml);
+        });
+        document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+          el.setAttribute("aria-label", t(el.dataset.i18nAria));
+        });
+        const canvas = document.getElementById("game");
+        if (canvas) canvas.setAttribute("aria-label", t("ariaGame"));
+      }
+
+      function detectLang() {
+        const params = new URLSearchParams(window.location.search);
+        const paramLang = params.get("lang");
+        if (supportedLangs.includes(paramLang)) return paramLang;
+        const stored = localStorage.getItem("preferredLang");
+        if (supportedLangs.includes(stored)) return stored;
+        const intlLocale =
+          typeof Intl === "object" && typeof Intl.DateTimeFormat === "function"
+            ? Intl.DateTimeFormat().resolvedOptions().locale
+            : "";
+        const sources = [
+          ...(navigator.languages || []),
+          navigator.language,
+          navigator.userLanguage,
+          intlLocale,
+        ]
+          .filter(Boolean)
+          .map((locale) => locale.toLowerCase());
+        const hasKorean = sources.some((locale) => locale.startsWith("ko"));
+        return hasKorean ? "ko" : "en";
+      }
+
+      function setLang(lang, options = {}) {
+        const nextLang = supportedLangs.includes(lang) ? lang : defaultLang;
+        currentLang = nextLang;
+        window.currentLang = currentLang;
+        document.documentElement.lang = nextLang;
+        localStorage.setItem("preferredLang", nextLang);
+        document.querySelectorAll(".lang-switch button").forEach((button) => {
+          button.classList.toggle("active", button.dataset.lang === nextLang);
+        });
+        applyTranslations();
+        if (options.updateUrl) {
+          const url = new URL(window.location.href);
+          url.searchParams.set("lang", nextLang);
+          window.history.replaceState({}, "", url);
+        }
+      }
+
+      document.querySelectorAll(".lang-switch button").forEach((button) => {
+        button.addEventListener("click", () => {
+          setLang(button.dataset.lang, { updateUrl: true });
+        });
+      });
+
+      setLang(detectLang(), { updateUrl: false });
+
+      // Make t() function and currentLang globally available
+      window.t = t;
+      window.currentLang = currentLang;
+      window.setLang = setLang;
+    </script>
     <script defer src="./script.js"></script>
   
 <ins class="adsbygoogle"
