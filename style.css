@@ -278,8 +278,7 @@ body{
     display:none;
   }
   /* 모바일 결과 화면: "다른 서비스 보기" 버튼을 우상단에 표시 */
-  .overlay:not(.hidden) ~ .cta-button,
-  .app:has(.overlay:not(.hidden)) .cta-button{
+  .cta-button.result-visible{
     display:inline-flex;
     right:12px;
     top:12px;
