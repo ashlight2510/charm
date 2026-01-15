@@ -148,6 +148,11 @@ body{
   cursor:pointer;
   flex:1;
 }
+.btn:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+  box-shadow:none;
+}
 .btn:active{transform: translateY(1px)}
 .btn.primary{
   background: linear-gradient(135deg, rgba(124,77,255,.72), rgba(0,229,255,.34));
@@ -158,6 +163,14 @@ body{
   margin-top:10px;
   font-size:12px;
   color:rgba(152,160,201,.92);
+}
+.gameover-ad{
+  margin-top:12px;
+  padding:10px;
+  border-radius:14px;
+  background: rgba(12,18,42,.72);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow: 0 14px 40px rgba(0,0,0,.35);
 }
 
 .controls{

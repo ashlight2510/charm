@@ -14,6 +14,10 @@
   const $btnStart = document.getElementById("btnStart");
   const $btnMute = document.getElementById("btnMute");
 
+  const RESTART_DELAY_MS = 2000;
+  let restartUnlockAt = 0;
+  let restartTimer = null;
+
   const laneBtns = [...document.querySelectorAll(".laneBtn")];
 
   // ---------- Ranking (Supabase)
@@ -277,6 +281,37 @@
     }
   }
 
+  function lockRestart() {
+    restartUnlockAt = Date.now() + RESTART_DELAY_MS;
+    if ($btnStart) $btnStart.disabled = true;
+    if (restartTimer) clearTimeout(restartTimer);
+    restartTimer = setTimeout(() => {
+      if (!state.gameOver) return;
+      if ($btnStart) $btnStart.disabled = false;
+    }, RESTART_DELAY_MS);
+  }
+
+  function unlockRestart() {
+    restartUnlockAt = 0;
+    if (restartTimer) clearTimeout(restartTimer);
+    if ($btnStart) $btnStart.disabled = false;
+  }
+
+  function canRestart() {
+    return Date.now() >= restartUnlockAt;
+  }
+
+  function loadGameOverAd() {
+    const ad = $overlay.querySelector("#gameoverAd");
+    if (!ad || ad.dataset.loaded) return;
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      ad.dataset.loaded = "true";
+    } catch {
+      // ignore ad loading errors
+    }
+  }
+
   function nextRound() {
     state.round += 1;
     // 라운드가 올라가면 미사일 속도/스폰 템포가 조금 빨라짐
@@ -385,7 +420,18 @@
         </div>
         <p id="rankStatus" class="muted" style="margin-top:8px"></p>
         <div id="leaderboard" style="margin-top:10px"></div>
+        <div id="gameoverAd" class="gameover-ad">
+          <ins
+            class="adsbygoogle"
+            style="display:block; width:100%;"
+            data-ad-client="ca-pub-1204894220949193"
+            data-ad-slot="5145068706"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          ></ins>
+        </div>
         <p class="muted" style="margin-top:10px">${t("playAgain")}</p>
+        <p class="muted" style="margin-top:6px">${t("restartDelayHint")}</p>
       `;
     }
     if (actions) {
@@ -393,6 +439,8 @@
       if (start) start.textContent = t("btnRestart");
     }
     setOverlayVisible(true, t("resultTitle"));
+    loadGameOverAd();
+    lockRestart();
     wireGameOverRankingUI();
   }
 
@@ -1322,8 +1370,10 @@
   );
 
   function startGame() {
+    if (state.gameOver && !canRestart()) return;
     reset();
     setOverlayVisible(false);
+    unlockRestart();
   }
   $btnStart.addEventListener("click", () => startGame());
 
