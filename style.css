@@ -294,8 +294,7 @@ body{
   .topbar{display:none}
   .stageWrap{padding:6px 12px 0}
   /* 결과 화면에서만 우상단에 표시 */
-  .overlay:not(.hidden) ~ .cta-button,
-  .app:has(.overlay:not(.hidden)) .cta-button{
+  .cta-button.result-visible{
     top:8px;
     right:8px;
   }
