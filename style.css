@@ -267,8 +267,17 @@ body{
     padding:16px 10px;
   }
 
+  /* 모바일 게임 중: "다른 서비스 보기" 버튼 숨김 */
   .cta-button{
-    right:12px; bottom:12px;
+    display:none;
+  }
+  /* 모바일 결과 화면: "다른 서비스 보기" 버튼을 우상단에 표시 */
+  .overlay:not(.hidden) ~ .cta-button,
+  .app:has(.overlay:not(.hidden)) .cta-button{
+    display:inline-flex;
+    right:12px;
+    top:12px;
+    bottom:auto;
     padding:11px 12px;
     gap:8px;
   }
@@ -279,7 +288,11 @@ body{
   /* 작은 화면에서는 상단 전체를 숨겨서 게임/버튼을 최대 확보 */
   .topbar{display:none}
   .stageWrap{padding:6px 12px 0}
-  /* CTA가 버튼을 가리지 않도록 위로 올림 */
-  .cta-button{bottom:92px}
+  /* 결과 화면에서만 우상단에 표시 */
+  .overlay:not(.hidden) ~ .cta-button,
+  .app:has(.overlay:not(.hidden)) .cta-button{
+    top:8px;
+    right:8px;
+  }
 }
 

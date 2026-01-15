@@ -10,6 +10,7 @@
   const $life = document.getElementById("life");
   const $round = document.getElementById("round");
   const $overlay = document.getElementById("overlay");
+  const $ctaButton = document.querySelector(".cta-button");
   const $btnStart = document.getElementById("btnStart");
   const $btnMute = document.getElementById("btnMute");
 
@@ -253,12 +254,26 @@
   function setOverlayVisible(visible, title = null) {
     if (visible) {
       $overlay.classList.remove("hidden");
+      // 모바일에서 결과 화면일 때만 "다른 서비스 보기" 버튼을 우상단에 표시
+      if ($ctaButton && window.innerWidth <= 640) {
+        // 결과 화면인지 확인 (title이 "결과" 또는 "Result"인 경우)
+        const isResultScreen = title && (title.includes("결과") || title.includes("Result"));
+        if (isResultScreen) {
+          $ctaButton.classList.add("result-visible");
+        } else {
+          $ctaButton.classList.remove("result-visible");
+        }
+      }
       if (title) {
         const t = $overlay.querySelector(".cardTitle");
         if (t) t.textContent = title;
       }
     } else {
       $overlay.classList.add("hidden");
+      // 게임 중에는 "다른 서비스 보기" 버튼 숨김
+      if ($ctaButton && window.innerWidth <= 640) {
+        $ctaButton.classList.remove("result-visible");
+      }
     }
   }
 
@@ -1235,10 +1250,12 @@
       m.y += m.vy * dt;
 
       // collision with player (same lane + y overlap)
+      // 판정을 더 빨리: 레이저가 플레이어보다 위로 통과하고 나서 맞는 경우 방지
       const playerY = getHitY() - (state.player.status === "hit" ? 90 : 0);
       if (state.player.status === "alive" && m.lane === state.player.lane) {
         const dy = Math.abs(m.y - playerY);
-        if (dy < 44) {
+        // dy < 28로 줄여서 거의 닿자마자 맞도록 판정 (기존 44에서 감소)
+        if (dy < 28) {
           const t = window.t || ((key, vars = {}) => key);
           fail(t("hitByLaser"));
         }
