@@ -35,7 +35,7 @@ body{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:14px 16px;
+  padding:14px 120px 14px 16px;
   gap:12px;
 }
 
@@ -237,16 +237,22 @@ body{
 .cta-button:hover .cta-arrow{transform: translate(2px, -2px)}
 
 @media (max-height: 750px){
-  .topbar{padding:10px 12px}
+  .topbar{padding:10px 108px 10px 12px}
   .controls{padding:8px 12px 12px}
 }
 
 @media (max-width: 640px){
   /* 모바일: 윗부분을 더 덜 보이게(게임 화면 확보) */
   .topbar{
-    padding:8px 10px;
+    padding:8px 108px 8px 10px;
   }
-  .brand{display:none}
+  .brand{display:flex; gap:8px; align-items:center}
+  .logo{
+    width:32px;
+    height:32px;
+    border-radius:12px;
+  }
+  .title{display:none}
   .hud{
     gap:8px;
   }
@@ -295,4 +301,3 @@ body{
     right:8px;
   }
 }
-
