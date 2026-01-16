@@ -159,7 +159,7 @@
           class="stage"
           width="900"
           height="1500"
-          aria-label="참참참 게임"
+          data-i18n-aria-label="ariaGame"
         ></canvas>
 
         <div id="overlay" class="overlay">
@@ -329,8 +329,9 @@
         document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
           el.setAttribute("aria-label", t(el.dataset.i18nAria));
         });
-        const canvas = document.getElementById("game");
-        if (canvas) canvas.setAttribute("aria-label", t("ariaGame"));
+        document.querySelectorAll("[data-i18n-aria-label]").forEach((el) => {
+          el.setAttribute("aria-label", t(el.dataset.i18nAriaLabel));
+        });
       }
 
       function detectLang() {
@@ -343,10 +344,11 @@
           navigator.languages && navigator.languages.length
             ? navigator.languages[0]
             : navigator.language;
+        // 한국에서 접속하면 한글, 그 외 지역에서는 영어
         if (browserLang && browserLang.toLowerCase().startsWith("ko")) {
           return "ko";
         }
-        return defaultLang;
+        return "en"; // 한국이 아니면 영어를 기본값으로
       }
 
       function setLang(lang, options = {}) {

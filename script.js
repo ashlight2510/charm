@@ -1248,10 +1248,16 @@
 
   // ---------- main loop
   let last = performance.now();
+  let frameTimeHistory = [];
   function frame(now) {
+    const rawDt = (now - last) / 1000;
     // dt를 너무 타이트하게(0.033) 자르면 프레임이 밀릴 때 "끊기는 느낌"이 날 수 있어서
     // 약간 여유를 주고(0.05) 연산 폭증은 clamp로 막음
-    const dt = clamp((now - last) / 1000, 0, 0.05);
+    // 더 부드러운 느낌을 위해 0.06까지 허용하되, 평균 프레임타임 추적
+    frameTimeHistory.push(rawDt);
+    if (frameTimeHistory.length > 10) frameTimeHistory.shift();
+    const avgFrameTime = frameTimeHistory.reduce((a, b) => a + b, 0) / frameTimeHistory.length;
+    const dt = clamp(rawDt, 0, Math.max(0.05, avgFrameTime * 1.2));
     last = now;
 
     // hit animation timeline
